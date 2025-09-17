@@ -39,6 +39,7 @@ namespace Mini_Adventure
             };
 
             List<Player> players = new List<Player>();
+            Player currentPlayer = null;
 
             bool gameRunning = true;
             while (gameRunning)
@@ -58,17 +59,32 @@ namespace Mini_Adventure
                 switch (choice)
                 {
                     case 1:
-                        AdventureHelper.AddPlayer(players, listOfWeapons);
+                        if (players.Count == 0)
+                        {
+                            currentPlayer = AdventureHelper.AddPlayer(players, listOfWeapons);
+                        }
+                        else
+                        {
+                            AdventureHelper.AddPlayer(players, listOfWeapons);
+                        }
                         break;
 
                     case 2:
-                        if (players.Count > 0)
+                        if (currentPlayer != null)
                         {
                             AdventureHelper.ShowPlayerStats(players[0]);
                         }
                         else
                         {
                             Console.WriteLine("No players in the list");
+                        }
+                        break;
+
+                    case 3:
+                        if (currentPlayer != null)
+                        {
+                        AdventureHelper.GoToDungeon(currentPlayer, listOfEnemies);
+
                         }
                         break;
 

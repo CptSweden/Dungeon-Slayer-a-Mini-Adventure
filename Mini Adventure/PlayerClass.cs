@@ -5,6 +5,5 @@ namespace Mini_Adventure
     {
         public string Name;
         public int Hp;
-        public string Weapon;
     }
 }

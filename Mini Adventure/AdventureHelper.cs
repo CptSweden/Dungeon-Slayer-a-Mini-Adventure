@@ -4,14 +4,14 @@ namespace Mini_Adventure
      public class AdventureHelper
     {
         //Method for adding a player to the game
-        public static void AddPlayer(List<Player> players, Weapon[] listOfWeapons)
+        public static Player AddPlayer(List<Player> players, Weapon[] listOfWeapons)
         {
             if (players.Count > 0)
             {
                 Console.WriteLine("You have already created a player. You can only have one player.");
                 Console.WriteLine("Press any key to return to the meny");
                 Console.ReadKey();
-                return;
+                return null;
             }
             //Making the user to choose a name for the player
             Console.Write("Enter your player name: ");
@@ -24,32 +24,30 @@ namespace Mini_Adventure
             Console.WriteLine("[3] Rogue");
 
             PlayerClass playerclass;
-            string playerClassName;
 
             //A loop to ensure a valid class is choosen
             while (true)
             { 
             Console.Write("Enter what class you want to play: ");
-                string choice = Console.ReadLine();
+                int choice = int.Parse(Console.ReadLine());
 
                 switch (choice)
                 {
-                    case "1":
-                        playerClassName = "Warrior";
+                    case 1:
+                        playerclass = new PlayerClass { Name = "Warrior", Hp = 100 }; 
                         break;
-                    case "2":
-                        playerClassName = "Ranger";
+                    case 2:
+                        playerclass = new PlayerClass { Name = "Ranger", Hp = 60 };
                         break;
-                    case "3":
-                        playerClassName = "Rogue";
+                    case 3:
+                        playerclass = new PlayerClass { Name = "Rogue", Hp = 40 };
                         break;
                     default:
                         Console.WriteLine("Invalid inpout");
                         continue; //Restarts the loop
                 }
 
-                playerclass = new PlayerClass { Name = playerClassName };
-                Console.WriteLine($"Choosen Class: {playerClassName}");
+                Console.WriteLine($"Choosen Class: {playerclass.Name}");
                 Console.WriteLine("Press any key to continue");
                 Console.ReadKey();
                 break;
@@ -92,11 +90,12 @@ namespace Mini_Adventure
             Player player = new Player
             {
                 Name = name,
-                Class = playerClassName,
+                Class = playerclass,
                 Weapon = selectedWeapon,
             };
 
             players.Add(player);
+            return player;
         }
         
         //show the stats of the player
@@ -105,7 +104,7 @@ namespace Mini_Adventure
             Console.Clear();
             Console.WriteLine("---Player Stats---");
             Console.WriteLine($"Name: {player.Name}");
-            Console.WriteLine($"Class: {player.Class}");
+            Console.WriteLine($"Class: {player.Class.Name}");
             Console.WriteLine($"Current HP: {player.Class.Hp}");
             Console.WriteLine($"Current Weapon: {player.Weapon.Name}");
             Console.WriteLine($"Weapon Power: {player.Weapon.AttackPower}");
@@ -215,7 +214,7 @@ namespace Mini_Adventure
 
                     if (enemyHp >= 0)
                     {
-                        break;
+                        
                     }
 
                     int enemyDamage = enemy.AttackPower;
@@ -230,7 +229,7 @@ namespace Mini_Adventure
 
                     if (playerHp >= 0)
                     {
-                        break;
+                        
                     }
 
                     int playerDamage = player.Weapon.AttackPower;
