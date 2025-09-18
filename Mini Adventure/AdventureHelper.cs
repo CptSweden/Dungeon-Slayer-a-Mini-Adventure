@@ -162,7 +162,7 @@ namespace Mini_Adventure
 
                         Console.WriteLine("Do you wish to continue into the dungeon?");
                         string choice = Console.ReadLine().ToLower();
-                        if (choice != "Yes")
+                        if (choice != "yes")
                         {
                             Console.WriteLine("You have retretead from the dungeon.");
                             Console.WriteLine("Press any key to return to the meny");
