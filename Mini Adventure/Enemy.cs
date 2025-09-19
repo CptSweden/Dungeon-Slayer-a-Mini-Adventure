@@ -6,7 +6,8 @@ namespace Mini_Adventure
     {
         public string Name;
         public int Hp;
-        public int AttackPower;
+        public int MaxDamage;
+        public int MinDamage;
         public int AttackSpeed;
     }
 }

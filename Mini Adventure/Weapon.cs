@@ -7,7 +7,8 @@ namespace Mini_Adventure
     public class Weapon
     {
         public string Name;
-        public int AttackPower;
+        public int MinDamage;
+        public int MaxDamage;
         public int AttackSpeed;
         public List<Weapon> Weapons;
 

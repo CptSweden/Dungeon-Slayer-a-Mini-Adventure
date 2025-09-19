@@ -6,6 +6,7 @@ namespace Mini_Adventure
         public string Name;
         public PlayerClass Class;
         public Weapon Weapon;
+        public int CurrentHP;
         /*public List<Weapon> Weapons;
 
         public void HasWeapon(Weapon weapon)

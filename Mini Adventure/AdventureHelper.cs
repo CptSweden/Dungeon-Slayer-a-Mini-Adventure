@@ -6,18 +6,27 @@ namespace Mini_Adventure
         //Method for adding a player to the game
         public static Player AddPlayer(List<Player> players, Weapon[] listOfWeapons)
         {
+            Console.Clear();
+
             if (players.Count > 0)
             {
+                Console.WriteLine("==========");
                 Console.WriteLine("You have already created a player. You can only have one player.");
                 Console.WriteLine("Press any key to return to the meny");
+                Console.WriteLine("==========");
                 Console.ReadKey();
                 return null;
             }
             //Making the user to choose a name for the player
+            Console.WriteLine("==========");
             Console.Write("Enter your player name: ");
+            Console.WriteLine();
+            Console.WriteLine("==========");
             string name = Console.ReadLine();
+            Console.Clear();
 
             //Tells the user what classes are available 
+            Console.WriteLine("==========");
             Console.WriteLine("---Classes---");
             Console.WriteLine("[1] Warrior");
             Console.WriteLine("[2] Ranger");
@@ -27,8 +36,11 @@ namespace Mini_Adventure
 
             //A loop to ensure a valid class is choosen
             while (true)
-            { 
-            Console.Write("Enter what class you want to play: ");
+            {
+                Console.WriteLine("==========");
+                Console.Write("Enter what class you want to play: ");
+                Console.WriteLine();
+                Console.WriteLine("==========");
                 int choice = int.Parse(Console.ReadLine());
 
                 switch (choice)
@@ -43,24 +55,36 @@ namespace Mini_Adventure
                         playerclass = new PlayerClass { Name = "Rogue", Hp = 40 };
                         break;
                     default:
-                        Console.WriteLine("Invalid inpout");
+                        Console.WriteLine("==========");
+                        Console.WriteLine("Invalid input");
+                        Console.WriteLine("==========");
                         continue; //Restarts the loop
                 }
 
+                Console.Clear();
+                Console.WriteLine("==========");
                 Console.WriteLine($"Choosen Class: {playerclass.Name}");
                 Console.WriteLine("Press any key to continue");
+                Console.WriteLine("==========");
                 Console.ReadKey();
                 break;
 
             }
             //Tells the user what class specific weapons are available
+            Console.Clear();
+            Console.WriteLine("==========");
             Console.WriteLine("---Weapons---");
-            Console.WriteLine("Avalible weapons:");          
-            foreach (Weapon weapon in listOfWeapons)
+            Console.WriteLine("==========");
+
+            List<Weapon> usableWeapons = new List<Weapon>();
+
+            Console.WriteLine("Avalible weapons:");            
+            for(int i = 0; i < listOfWeapons.Length; i++)
             {
-                if (Weapon.CanUseWeapon(weapon, playerclass))
+                if (Weapon.CanUseWeapon(listOfWeapons[i], playerclass))
                 {
-                    Console.WriteLine(weapon.Name);
+                    usableWeapons.Add(listOfWeapons[i]);
+                    Console.WriteLine($"[{usableWeapons.Count}] {listOfWeapons[i].Name}");
                 }
             }
 
@@ -68,22 +92,31 @@ namespace Mini_Adventure
             Weapon selectedWeapon = null;
             while (selectedWeapon == null)
             {
+                Console.WriteLine("==========");
                 Console.WriteLine("Select you starting weapon:");
-                string weaponName = Console.ReadLine();
+                Console.WriteLine("==========");
+                string input = Console.ReadLine();
 
-                foreach (Weapon weapon in listOfWeapons)
+                if (int.TryParse(input, out int choice))                
                 {
-                    if (weapon.Name == weaponName && Weapon.CanUseWeapon(weapon, playerclass)) 
+                    if (choice > 0 && choice <= usableWeapons.Count)
                     {
-                        selectedWeapon = weapon;
-                        break;
+                        selectedWeapon = usableWeapons[choice - 1];
+                    }
+                    else
+                    {
+                        Console.WriteLine("==========");
+                        Console.WriteLine("Invalid input");
+                        Console.WriteLine("==========");
                     }
 
                 }
 
                 if (selectedWeapon == null) 
                 {
+                    Console.WriteLine("==========");
                     Console.WriteLine("Invalid weapon choice. Try again!");
+                    Console.WriteLine("==========");
                 }
             }
 
@@ -92,6 +125,7 @@ namespace Mini_Adventure
                 Name = name,
                 Class = playerclass,
                 Weapon = selectedWeapon,
+                CurrentHP = playerclass.Hp,
             };
 
             players.Add(player);
@@ -102,34 +136,39 @@ namespace Mini_Adventure
         public static void ShowPlayerStats(Player player)
         {
             Console.Clear();
+            Console.WriteLine("==========");
             Console.WriteLine("---Player Stats---");
             Console.WriteLine($"Name: {player.Name}");
             Console.WriteLine($"Class: {player.Class.Name}");
-            Console.WriteLine($"Current HP: {player.Class.Hp}");
+            Console.WriteLine($"Current HP: {player.CurrentHP}");
             Console.WriteLine($"Current Weapon: {player.Weapon.Name}");
-            Console.WriteLine($"Weapon Power: {player.Weapon.AttackPower}");
+            Console.WriteLine($"Weapon Damage: Min: [{player.Weapon.MinDamage}] | Max: [{player.Weapon.MaxDamage}]");
             Console.WriteLine($"Weapon Speed: {player.Weapon.AttackSpeed}");
+            Console.WriteLine("==========");
             Console.WriteLine("Press any key to return to the meny");
+            Console.WriteLine("==========");
             Console.ReadKey();
         }
 
-        public static void GoToDungeon(Player player, Enemy[] listOfEnemies)
+        public static int GoToDungeon(Player player, Enemy[] listOfEnemies, int startLevel)
         {
-            Console.Clear();
 
             if (player == null || player.Weapon == null)
-            {
-                Console.WriteLine("You need to create a player to be able to go to the dungeon!");
-                Console.WriteLine("Press any key to continue");
-                Console.ReadKey();
-                return;
+            {              
+                return 0;
             }
+            
+            Console.Clear();
 
-            Enemy[] shuffledEnemies = new Enemy[listOfEnemies.Length];
-            Array.Copy(listOfEnemies, shuffledEnemies, listOfEnemies.Length);
+            Enemy[] regularEnemies = new Enemy[listOfEnemies.Length - 1];
+            Array.Copy(listOfEnemies, regularEnemies, listOfEnemies.Length - 1);
+            Enemy finalBoss = listOfEnemies[listOfEnemies.Length - 1];
 
+            Enemy[] shuffledEnemies = new Enemy[regularEnemies.Length];
+            Array.Copy(regularEnemies, shuffledEnemies, regularEnemies.Length);
             Random random = new Random();
             int n = shuffledEnemies.Length;
+
             for (int i = n - 1;i > 0; i--)
             {
                 int j = random.Next(0, i + 1);
@@ -138,117 +177,191 @@ namespace Mini_Adventure
                 shuffledEnemies[j] = temp;
             }
 
-            for (int i = 0; i < shuffledEnemies.Length; i++)
+            for (int i = startLevel; i < shuffledEnemies.Length; i++)
             {
+                Console.WriteLine("==========");
                 Console.WriteLine($"---Level {i + 1}---");
                 Console.WriteLine($"A {shuffledEnemies[i].Name} appears!");
 
-                bool playerAlive = Fight(player, shuffledEnemies[i]);
+                Fight(player, shuffledEnemies[i]);
 
-                if (!playerAlive) 
+                if (player.CurrentHP <= 0) 
                 {
                     Console.WriteLine("You have been defeated!");
+                    Console.WriteLine("==========");
                     Console.WriteLine("Press any key to return to the meny");
+                    Console.WriteLine("==========");
                     Console.ReadKey();
-                    return;
+                    return 0;
                 }
 
                 else
                 {
+                    Console.WriteLine("==========");
                     Console.WriteLine($"You have defetead {shuffledEnemies[i].Name}");
+                    Console.WriteLine("==========");
 
                     if (i < shuffledEnemies.Length - 1)
                     {
-
-                        Console.WriteLine("Do you wish to continue into the dungeon?");
-                        string choice = Console.ReadLine().ToLower();
-                        if (choice != "yes")
+                        while (true)
                         {
-                            Console.WriteLine("You have retretead from the dungeon.");
-                            Console.WriteLine("Press any key to return to the meny");
-                            Console.ReadKey();
-                            return;
+                            Console.WriteLine("---[Yes/No] Do you wish to continue into the dungeon?---");
+                            Console.WriteLine("==========");
+                            string choice = Console.ReadLine().ToLower();
+                            if (choice == "yes")
+                            {
+                                break;
+                            }
+                            else if (choice == "no")
+                            {
+                                Console.WriteLine("==========");
+                                Console.WriteLine("You have retretead from the dungeon.");
+                                Console.WriteLine("Press any key to return to the meny");
+                                Console.WriteLine("==========");
+                                Console.ReadKey();
+                                return i + 1;
+                            }
+                            else
+                            {
+                                Console.WriteLine("==========");
+                                Console.WriteLine("Invalid input");
+                                Console.WriteLine("==========");
+                            }
                         }
                     }
                 }
             }
 
+            Console.WriteLine("==========");
             Console.WriteLine("---BOSS FIGHT---");
             Console.WriteLine("You have reached the end of the dungeon.");
             Console.WriteLine("Prepere for the boss fight");
-            Console.WriteLine($"Final Boss: {shuffledEnemies[shuffledEnemies.Length - 1].Name}");
-            bool defeatedBoss = Fight(player, shuffledEnemies[shuffledEnemies.Length - 1]);
+            Console.WriteLine($"Final Boss: {finalBoss.Name}");
+            Fight(player, finalBoss);
 
-            if (defeatedBoss)
+            if (player.CurrentHP > 0)
             {
-                Console.WriteLine("CONGRATULATION");
+                Console.WriteLine("==========");
+                Console.WriteLine("---CONGRATULATION---");
                 Console.WriteLine("You have cleared the dungeon!");
+                Console.WriteLine("==========");
             }
             else
             {
+                Console.WriteLine("==========");
                 Console.WriteLine("You have been defeated by the Boss!");
+                Console.WriteLine("==========");
             }
 
+            Console.WriteLine("==========");
             Console.WriteLine("Press any key to return to the meny");
+            Console.WriteLine("==========");
+            Console.ReadKey();
+            return 0;
         }
 
-       public static bool Fight(Player player, Enemy enemy)
+       public static void Fight(Player player, Enemy enemy)
         {
-            int playerHp = player.Class.Hp;
+            
             int enemyHp = enemy.Hp;
+            Random random = new Random();
 
-            Console.WriteLine($"Your HP: {playerHp}");
+            Console.WriteLine($"Your HP: {player.CurrentHP}");
             Console.WriteLine($"{enemy.Name}'s HP: {enemyHp}");
+            Console.WriteLine("==========");
             Console.WriteLine("Press any key to start the fight");
+            Console.WriteLine("==========");
             Console.ReadKey();
+            Console.Clear();
 
             bool playerStarts = player.Weapon.AttackSpeed >= enemy.AttackSpeed;
 
-            while (playerHp > 0 && enemyHp > 0) 
+            while (player.CurrentHP > 0 && enemyHp > 0) 
             {
+                Console.WriteLine("==========");
+                Console.WriteLine("---FIGHT START---");
+
                 if (playerStarts)
                 {
-                    int playerDamage = player.Weapon.AttackPower;
+                    int playerDamage = random.Next(player.Weapon.MinDamage, player.Weapon.MaxDamage + 1);
                     enemyHp -= playerDamage;
+                    if (enemyHp < 0)
+                    {
+                        enemyHp = 0;
+                    }
                     Console.WriteLine($"You attacked the {enemy.Name} and did {playerDamage} damage.");
 
-                    if (enemyHp >= 0)
+                    if (enemyHp <= 0)
                     {
-                        
+                        break;    
                     }
 
-                    int enemyDamage = enemy.AttackPower;
-                    playerHp -= enemyDamage;
+                    int enemyDamage = random.Next(enemy.MinDamage, enemy.MaxDamage + 1);
+                    player.CurrentHP -= enemyDamage;
+                    if (player.CurrentHP <= 0)
+                    {
+                        player.CurrentHP = 0;
+                    }
                     Console.WriteLine($"The {enemy.Name} did {enemyDamage} damage on you");
                 }
                 else
                 {
-                    int enemyDamage = enemy.AttackPower;
-                    playerHp -= enemyDamage;
+                    int enemyDamage = random.Next(enemy.MinDamage, enemy.MaxDamage +1);
+                    player.CurrentHP -= enemyDamage;
+                    if (player.CurrentHP < 0)
+                    {
+                        player.CurrentHP = 0;
+                    }
                     Console.WriteLine($"The {enemy.Name} did {enemyDamage} damage on you");
 
-                    if (playerHp >= 0)
+                    if (player.CurrentHP <= 0)
                     {
-                        
+                        break;
                     }
 
-                    int playerDamage = player.Weapon.AttackPower;
+                    int playerDamage = random.Next(player.Weapon.MinDamage, player.Weapon.MaxDamage + 1);
                     enemyHp -= playerDamage;
+                    if (enemyHp < 0)
+                    {
+                        enemyHp = 0;
+                    }
                     Console.WriteLine($"You attacked the {enemy.Name} and did {playerDamage} damage.");
 
                 }
 
-                Console.WriteLine($"Your current HP is: {playerHp}");
+                Console.WriteLine($"Your current HP is: {player.CurrentHP}");
                 Console.WriteLine($"{enemy.Name}'s HP is {enemyHp}");
+                Console.WriteLine("==========");
                 Console.WriteLine("Press any key to continue the fight");
+                Console.WriteLine("==========");
                 Console.ReadKey();
+                Console.Clear();
 
             }
 
             Console.WriteLine("The fight is over");
-            Console.WriteLine($"Your current HP: {playerHp}");
+            Console.WriteLine($"Your current HP: {player.CurrentHP}");
 
-            return playerHp > 0;
+        }
+
+        public static void Rest(Player player)
+        {
+            Console.Clear();
+
+            if (player == null)
+            {               
+                return;
+            }
+            Console.WriteLine("==========");
+            Console.WriteLine("AT THE CAMPFIRE");
+            Console.WriteLine("==========");
+            Console.WriteLine("You are now resting and starts to feel healed");
+            player.CurrentHP = player.Class.Hp;
+            Console.WriteLine($"Your HP has restored to {player.CurrentHP}");
+            Console.WriteLine("==========");
+            Console.WriteLine("Press any key to continue");
+            Console.WriteLine("==========");
+            Console.ReadKey();
         }
 
         
